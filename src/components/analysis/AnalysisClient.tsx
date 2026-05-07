@@ -16,7 +16,11 @@ import {
   buildHealthInsight,
   buildInsightMetrics,
 } from "@/lib/ai-templates";
-import { COUNTRY_CODES, standardForCountry } from "@/lib/region";
+import {
+  COUNTRY_CODES,
+  normalizeCountryCode,
+  standardForCountry,
+} from "@/lib/region";
 import { BmiDonut } from "./BmiDonut";
 import { BmiScaleBar } from "./BmiScaleBar";
 
@@ -94,16 +98,20 @@ export function AnalysisClient() {
 
   useEffect(() => {
     /* eslint-disable react-hooks/set-state-in-effect -- client-only hydration */
-    const c = readCountryCookie();
-    if (c && COUNTRY_CODES.includes(c)) {
-      setCountryCode(c);
-      setUnits(defaultUnitsForCountry(c));
+    const rawCookie = readCountryCookie();
+    if (rawCookie) {
+      const c = normalizeCountryCode(rawCookie);
+      if (COUNTRY_CODES.includes(c)) {
+        setCountryCode(c);
+        setUnits(defaultUnitsForCountry(c));
+      }
     }
     try {
       const raw = localStorage.getItem(STORAGE);
       if (raw) {
         const s = JSON.parse(raw) as Partial<Snapshot>;
-        if (s.countryCode) setCountryCode(s.countryCode);
+        if (s.countryCode)
+          setCountryCode(normalizeCountryCode(s.countryCode));
         if (s.sex) setSex(s.sex);
         if (typeof s.age === "number") setAge(s.age);
         if (s.activity) setActivity(s.activity);

@@ -10,7 +10,7 @@ import {
   generateBMIAnalysis,
   isDeepseekConfigured,
 } from "@/lib/ai/deepseek";
-import { standardForCountry } from "@/lib/region";
+import { normalizeCountryCode, standardForCountry } from "@/lib/region";
 
 const CATEGORY_EN: Record<BmiCategoryKey, string> = {
   underweight: "Underweight",
@@ -43,9 +43,10 @@ const COUNTRY_NAME_TO_CODE: Record<string, string> = {
 function resolveCountryCode(input: unknown): string {
   if (typeof input !== "string") return "US";
   const t = input.trim();
-  if (/^[A-Za-z]{2}$/.test(t)) return t.toUpperCase();
-  const code = COUNTRY_NAME_TO_CODE[t.toLowerCase()];
-  return code ?? "US";
+  let code: string;
+  if (/^[A-Za-z]{2}$/.test(t)) code = t.toUpperCase();
+  else code = COUNTRY_NAME_TO_CODE[t.toLowerCase()] ?? "US";
+  return normalizeCountryCode(code);
 }
 
 function resolveCountryLabel(body: Record<string, unknown>, code: string): string {

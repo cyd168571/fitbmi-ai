@@ -9,7 +9,6 @@ export interface CountryOption {
 export const COUNTRY_STANDARD: Record<string, BmiStandard> = {
   JP: "japan",
   CN: "asian",
-  TW: "asian",
   HK: "asian",
   SG: "asian",
   IN: "asian",
@@ -23,8 +22,14 @@ export const COUNTRY_STANDARD: Record<string, BmiStandard> = {
   PK: "asian",
 };
 
+/** Taiwan is not a selectable region; TW geo/cookie maps to CN for standards. */
+export function normalizeCountryCode(code: string): string {
+  return code === "TW" ? "CN" : code;
+}
+
 export function standardForCountry(code: string): BmiStandard {
-  return COUNTRY_STANDARD[code] ?? "who";
+  const key = normalizeCountryCode(code);
+  return COUNTRY_STANDARD[key] ?? "who";
 }
 
 export const COUNTRY_CODES: string[] = [
@@ -41,7 +46,6 @@ export const COUNTRY_CODES: string[] = [
   "JP",
   "KR",
   "CN",
-  "TW",
   "HK",
   "SG",
   "IN",

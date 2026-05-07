@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { COUNTRY_CODES } from "@/lib/region";
+import { COUNTRY_CODES, normalizeCountryCode } from "@/lib/region";
 
 const FLAGS: Record<string, string> = {
   US: "🇺🇸",
@@ -18,7 +18,6 @@ const FLAGS: Record<string, string> = {
   JP: "🇯🇵",
   KR: "🇰🇷",
   CN: "🇨🇳",
-  TW: "🇹🇼",
   HK: "🇭🇰",
   SG: "🇸🇬",
   IN: "🇮🇳",
@@ -54,7 +53,8 @@ export function RegionSwitcher() {
 
   useEffect(() => {
     /* eslint-disable react-hooks/set-state-in-effect -- hydrate flag + ISO from cookie */
-    const c = readCountryCookie();
+    const raw = readCountryCookie();
+    const c = raw ? normalizeCountryCode(raw) : null;
     if (c && COUNTRY_CODES.includes(c)) setCode(c);
     /* eslint-enable react-hooks/set-state-in-effect */
   }, []);
