@@ -2,13 +2,20 @@
 
 import { useState } from "react";
 
+type AnalyzeResponse = {
+  bmi: number;
+  category: string;
+  analysis: string;
+  error?: string;
+};
+
 export default function HomePage() {
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
 
   const [loading, setLoading] = useState(false);
 
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<AnalyzeResponse | null>(null);
 
   async function handleCalculate() {
     try {
@@ -30,7 +37,20 @@ export default function HomePage() {
         }),
       });
 
-      const data = await response.json();
+      const data = (await response.json()) as AnalyzeResponse;
+
+      if (!response.ok) {
+        setResult({
+          bmi: 0,
+          category: "",
+          analysis: "",
+          error:
+            typeof data.error === "string"
+              ? data.error
+              : `Request failed (${response.status})`,
+        });
+        return;
+      }
 
       setResult(data);
     } catch (error) {
@@ -92,24 +112,30 @@ export default function HomePage() {
             Result
           </h2>
 
-          <p className="mb-2">
-            <strong>BMI:</strong> {result.bmi}
-          </p>
+          {result.error ? (
+            <p className="text-red-600">{result.error}</p>
+          ) : (
+            <>
+              <p className="mb-2">
+                <strong>BMI:</strong> {result.bmi}
+              </p>
 
-          <p className="mb-4">
-            <strong>Category:</strong>{" "}
-            {result.category}
-          </p>
+              <p className="mb-4">
+                <strong>Category:</strong>{" "}
+                {result.category}
+              </p>
 
-          <div>
-            <h3 className="font-bold mb-2">
-              AI Analysis
-            </h3>
+              <div>
+                <h3 className="font-bold mb-2">
+                  AI Analysis
+                </h3>
 
-            <p className="leading-7">
-              {result.analysis}
-            </p>
-          </div>
+                <p className="leading-7">
+                  {result.analysis}
+                </p>
+              </div>
+            </>
+          )}
         </div>
       )}
     </main>

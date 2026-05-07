@@ -53,5 +53,5 @@ Respond ONLY in ${data.language}.
     max_tokens: 300,
   });
 
-  return completion.choices[0].message.content;
+  return completion.choices[0].message.content ?? "";
 }
