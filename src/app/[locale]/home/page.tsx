@@ -8,13 +8,13 @@ export default function HomePage() {
   const t = useTranslations();
   return (
     <PageShell showHero>
-      <div className="px-4 pb-8">
-        <p className="text-sm leading-relaxed text-zinc-700">
+      <div className="pb-10 pt-2">
+        <p className="max-w-3xl text-sm leading-relaxed text-on-surface-variant md:text-base md:leading-7">
           {t("pages.about.body")}
         </p>
         <Link
           href="/analysis"
-          className="mt-6 inline-flex w-full items-center justify-center rounded-2xl bg-[#2ECC71] py-3.5 text-center text-base font-semibold text-white shadow-lg shadow-emerald-200/60 transition hover:bg-[#26b863]"
+          className="mt-6 inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-primary px-6 py-3.5 text-center text-base font-semibold text-on-primary shadow-[var(--shadow-primary-cta)] transition hover:brightness-110 lg:max-w-md"
         >
           {t("nav.analysis")}
         </Link>

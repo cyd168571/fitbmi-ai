@@ -65,6 +65,9 @@ function defaultUnitsForCountry(code: string): UnitMode {
   return code === "US" || code === "LR" ? "imperial" : "metric";
 }
 
+const inactiveToggle =
+  "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300";
+
 export function AnalysisClient() {
   const t = useTranslations();
   const tCat = useTranslations("categories");
@@ -86,8 +89,9 @@ export function AnalysisClient() {
   const [weightLbs, setWeightLbs] = useState(165);
 
   const [analyzed, setAnalyzed] = useState(false);
+  const [aiInsight, setAiInsight] = useState<string | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
 
-  /* Cookie + localStorage only exist on the client; hydrate after mount to avoid SSR mismatch. */
   useEffect(() => {
     /* eslint-disable react-hooks/set-state-in-effect -- client-only hydration */
     const c = readCountryCookie();
@@ -117,6 +121,19 @@ export function AnalysisClient() {
     /* eslint-enable react-hooks/set-state-in-effect */
   }, []);
 
+  useEffect(() => {
+    function onCountry(e: Event) {
+      const d = (e as CustomEvent<string>).detail;
+      if (typeof d === "string" && COUNTRY_CODES.includes(d)) {
+        setCountryCode(d);
+        setUnits(defaultUnitsForCountry(d));
+      }
+    }
+    window.addEventListener("fitbmi-country-change", onCountry);
+    return () =>
+      window.removeEventListener("fitbmi-country-change", onCountry);
+  }, []);
+
   const standard = useMemo(
     () => standardForCountry(countryCode),
     [countryCode],
@@ -125,9 +142,7 @@ export function AnalysisClient() {
   const metrics = useMemo(() => {
     const { ft, inch } = splitInches(heightInches);
     const heightMeters =
-      units === "metric"
-        ? cmToMeters(heightCm)
-        : ftInToMeters(ft, inch);
+      units === "metric" ? cmToMeters(heightCm) : ftInToMeters(ft, inch);
     const weightKgVal =
       units === "metric" ? weightKg : lbsToKg(weightLbs);
     const bmi = computeBmi(weightKgVal, heightMeters);
@@ -171,287 +186,418 @@ export function AnalysisClient() {
 
   const { ft: dispFt, inch: dispIn } = splitInches(heightInches);
 
-  function persistAndAnalyze() {
+  async function persistAndAnalyze() {
+    const heightSnap =
+      units === "metric" ? heightCm : cmFromInches(heightInches);
+    const weightSnap =
+      units === "metric" ? weightKg : lbsToKg(weightLbs);
+
     const snap: Snapshot = {
       countryCode,
       sex,
       age,
       activity,
       units,
-      heightCm:
-        units === "metric" ? heightCm : cmFromInches(heightInches),
-      weightKg:
-        units === "metric" ? weightKg : lbsToKg(weightLbs),
+      heightCm: heightSnap,
+      weightKg: weightSnap,
       bmi: metrics.bmi,
       standard,
       analyzedAt: new Date().toISOString(),
     };
+
+    setAiInsight(null);
+    setAnalyzed(true);
+    setAiLoading(true);
+
     try {
       localStorage.setItem(STORAGE, JSON.stringify(snap));
       localStorage.setItem(
         "fitbmi-plan",
-        JSON.stringify({ plan: metrics.plan, insight: metrics.insight, ...snap }),
+        JSON.stringify({
+          plan: metrics.plan,
+          insight: metrics.insight,
+          ...snap,
+        }),
       );
     } catch {
       /* ignore */
     }
-    setAnalyzed(true);
+
+    try {
+      const res = await fetch("/api/bmi/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          height: heightSnap,
+          weight: weightSnap,
+          countryCode,
+          countryLabel: tCountries(countryCode),
+          locale,
+          sex,
+          age,
+          activity,
+        }),
+      });
+      const data = (await res.json()) as {
+        analysis?: string;
+        error?: string;
+      };
+      if (!res.ok) {
+        setAiInsight(null);
+        return;
+      }
+      const text =
+        typeof data.analysis === "string" ? data.analysis.trim() : "";
+      setAiInsight(text || null);
+      try {
+        const planRaw = localStorage.getItem("fitbmi-plan");
+        const planPrev = planRaw ? (JSON.parse(planRaw) as object) : {};
+        localStorage.setItem(
+          "fitbmi-plan",
+          JSON.stringify({
+            ...planPrev,
+            insight: text || metrics.insight,
+            aiInsight: text,
+            ...snap,
+          }),
+        );
+      } catch {
+        /* ignore */
+      }
+    } catch {
+      setAiInsight(null);
+    } finally {
+      setAiLoading(false);
+    }
   }
 
   const categoryLabel = tCat(metrics.classification.labelKey);
 
-  return (
-    <div className="mx-auto flex max-w-lg flex-col gap-4 px-4 pb-10 pt-4">
-      <section className="rounded-2xl bg-white p-5 shadow-[0_8px_30px_rgba(0,0,0,0.06)] ring-1 ring-zinc-100">
-        <div className="mb-4 grid grid-cols-2 gap-3">
-          <button
-            type="button"
-            onClick={() => setSex("male")}
-            className={`flex items-center justify-center gap-2 rounded-xl border-2 py-3 text-sm font-semibold transition ${
-              sex === "male"
-                ? "border-[#2ECC71] bg-emerald-50 text-[#1B5E20]"
-                : "border-zinc-200 bg-white text-zinc-600"
-            }`}
-          >
-            ♂ {t("form.male")}
-          </button>
-          <button
-            type="button"
-            onClick={() => setSex("female")}
-            className={`flex items-center justify-center gap-2 rounded-xl border-2 py-3 text-sm font-semibold transition ${
-              sex === "female"
-                ? "border-[#2ECC71] bg-emerald-50 text-[#1B5E20]"
-                : "border-zinc-200 bg-white text-zinc-600"
-            }`}
-          >
-            ♀ {t("form.female")}
-          </button>
-        </div>
-
-        <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-zinc-500">
-          {t("form.country")}
-        </label>
-        <select
-          className="mb-4 w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-sm font-medium outline-none focus:border-[#2ECC71]"
-          value={countryCode}
-          onChange={(e) => {
-            const code = e.target.value;
-            setCountryCode(code);
-            setUnits(defaultUnitsForCountry(code));
-          }}
-        >
-          {COUNTRY_CODES.map((code) => (
-            <option key={code} value={code}>
-              {tCountries(code)}
-            </option>
-          ))}
-        </select>
-
-        <div className="mb-4 flex gap-2">
-          <button
-            type="button"
-            className={`flex-1 rounded-xl border py-2 text-sm font-semibold ${
-              units === "metric"
-                ? "border-[#2ECC71] bg-emerald-50 text-[#1B5E20]"
-                : "border-zinc-200"
-            }`}
-            onClick={() => setUnits("metric")}
-          >
-            {t("form.unitsMetric")}
-          </button>
-          <button
-            type="button"
-            className={`flex-1 rounded-xl border py-2 text-sm font-semibold ${
-              units === "imperial"
-                ? "border-[#2ECC71] bg-emerald-50 text-[#1B5E20]"
-                : "border-zinc-200"
-            }`}
-            onClick={() => setUnits("imperial")}
-          >
-            {t("form.unitsImperial")}
-          </button>
-        </div>
-
-        {units === "metric" ? (
-          <>
-            <FieldLabel>{t("form.heightCm")}</FieldLabel>
-            <div className="mb-4 flex items-center gap-3">
-              <input
-                type="range"
-                min={140}
-                max={220}
-                step={1}
-                value={heightCm}
-                onChange={(e) => setHeightCm(Number(e.target.value))}
-                className="h-2 flex-1 accent-[#2196F3]"
-              />
-              <span className="min-w-[4rem] text-right text-xl font-bold text-[#1B5E20]">
-                {heightCm}
-              </span>
-            </div>
-            <FieldLabel>{t("form.weightKg")}</FieldLabel>
-            <div className="mb-4 flex items-center gap-3">
-              <input
-                type="range"
-                min={40}
-                max={150}
-                step={0.5}
-                value={weightKg}
-                onChange={(e) => setWeightKg(Number(e.target.value))}
-                className="h-2 flex-1 accent-[#2196F3]"
-              />
-              <span className="min-w-[4rem] text-right text-xl font-bold text-[#1B5E20]">
-                {weightKg}
-              </span>
-            </div>
-          </>
+  const insightInner = (
+    <>
+      <p className="mb-2 flex items-center gap-2 text-sm font-bold text-secondary">
+        <span aria-hidden className="text-secondary">
+          ✦
+        </span>{" "}
+        {t("insight.title")}
+      </p>
+      <div className="rounded-xl bg-zinc-50 p-4 lg:bg-white lg:p-0 lg:shadow-none">
+        {aiLoading ? (
+          <p className="animate-pulse text-sm leading-relaxed text-outline">
+            {t("insight.aiLoading")}
+          </p>
         ) : (
-          <>
-            <FieldLabel>{t("form.heightFtIn")}</FieldLabel>
-            <div className="mb-1 flex items-center justify-end text-xl font-bold text-[#1B5E20]">
-              {dispFt}&apos; {dispIn}&quot;
-            </div>
-            <div className="mb-4 flex items-center gap-3">
-              <input
-                type="range"
-                min={56}
-                max={90}
-                step={1}
-                value={heightInches}
-                onChange={(e) => setHeightInches(Number(e.target.value))}
-                className="h-2 flex-1 accent-[#2196F3]"
-              />
-            </div>
-            <FieldLabel>{t("form.weightLbs")}</FieldLabel>
-            <div className="mb-1 flex items-center justify-end text-xl font-bold text-[#1B5E20]">
-              {weightLbs}
-            </div>
-            <div className="mb-4 flex items-center gap-3">
-              <input
-                type="range"
-                min={90}
-                max={400}
-                step={1}
-                value={weightLbs}
-                onChange={(e) => setWeightLbs(Number(e.target.value))}
-                className="h-2 flex-1 accent-[#2196F3]"
-              />
-            </div>
-          </>
+          <p className="text-sm leading-relaxed text-on-surface-variant">
+            {aiInsight ?? metrics.insight}
+          </p>
         )}
+      </div>
+      <div className="mt-4 grid grid-cols-2 gap-3">
+        <div className="rounded-lg bg-surface-container-low p-3 text-center ring-1 ring-outline-variant/20">
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-outline">
+            {t("insight.metabolicAge")}
+          </p>
+          <p className="font-data text-lg font-bold text-secondary">
+            {metrics.metabolicAge} {t("insight.years")}
+          </p>
+        </div>
+        <div className="rounded-lg bg-surface-container-low p-3 text-center ring-1 ring-outline-variant/20">
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-outline">
+            {t("insight.riskFactor")}
+          </p>
+          <p
+            className={`font-data text-lg font-bold ${
+              metrics.risk === "minimal"
+                ? "text-primary"
+                : metrics.risk === "moderate"
+                  ? "text-tertiary-container"
+                  : "text-error"
+            }`}
+          >
+            {tRisk(metrics.risk)}
+          </p>
+        </div>
+      </div>
+      <p className="mt-4 text-[11px] leading-relaxed text-outline italic lg:text-xs">
+        {t("disclaimer.ai")}
+      </p>
+    </>
+  );
 
-        <div className="mb-4 grid grid-cols-2 gap-3">
-          <div>
-            <FieldLabel>{t("form.age")}</FieldLabel>
-            <input
-              type="number"
-              min={12}
-              max={100}
-              value={age}
-              onChange={(e) => setAge(Number(e.target.value))}
-              className="w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm font-semibold outline-none focus:border-[#2ECC71]"
-            />
+  return (
+    <div className="pb-6 pt-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-start lg:gap-10">
+        <section className="rounded-2xl bg-surface p-5 shadow-[var(--shadow-card)] ring-1 ring-outline-variant/25">
+          <div className="mb-5 hidden items-center gap-2 lg:flex">
+            <span className="text-xl" aria-hidden>
+              📋
+            </span>
+            <h2 className="font-heading text-lg font-semibold text-brand">
+              {t("form.enterDetails")}
+            </h2>
           </div>
-          <div>
-            <FieldLabel>{t("form.activity")}</FieldLabel>
-            <select
-              className="w-full rounded-xl border border-zinc-200 bg-white px-2 py-2 text-sm font-semibold outline-none focus:border-[#2ECC71]"
-              value={activity}
-              onChange={(e) =>
-                setActivity(e.target.value as ActivityLevel)
-              }
+
+          <div className="mb-4 grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() => setSex("male")}
+              className={`flex min-h-11 items-center justify-center gap-2 rounded-lg border-2 py-3 text-sm font-semibold transition ${
+                sex === "male"
+                  ? "border-primary bg-primary text-on-primary shadow-[var(--shadow-primary-cta)]"
+                  : inactiveToggle
+              }`}
             >
-              {(
-                [
-                  "sedentary",
-                  "light",
-                  "moderate",
-                  "active",
-                  "very_active",
-                ] as ActivityLevel[]
-              ).map((k) => (
-                <option key={k} value={k}>
-                  {tAct(k)}
+              ♂ {t("form.male")}
+            </button>
+            <button
+              type="button"
+              onClick={() => setSex("female")}
+              className={`flex min-h-11 items-center justify-center gap-2 rounded-lg border-2 py-3 text-sm font-semibold transition ${
+                sex === "female"
+                  ? "border-primary bg-primary text-on-primary shadow-[var(--shadow-primary-cta)]"
+                  : inactiveToggle
+              }`}
+            >
+              ♀ {t("form.female")}
+            </button>
+          </div>
+
+          <div className="lg:hidden">
+            <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-outline">
+              {t("form.country")}
+            </label>
+            <select
+              className="vt-input mb-4"
+              value={countryCode}
+              onChange={(e) => {
+                const code = e.target.value;
+                setCountryCode(code);
+                setUnits(defaultUnitsForCountry(code));
+                document.cookie = `fitbmi-country=${encodeURIComponent(code)}; path=/; max-age=${60 * 60 * 24 * 180}; SameSite=Lax`;
+                window.dispatchEvent(
+                  new CustomEvent("fitbmi-country-change", {
+                    detail: code,
+                  }),
+                );
+              }}
+            >
+              {COUNTRY_CODES.map((code) => (
+                <option key={code} value={code}>
+                  {tCountries(code)}
                 </option>
               ))}
             </select>
           </div>
-        </div>
 
-        <button
-          type="button"
-          onClick={persistAndAnalyze}
-          className="w-full rounded-2xl bg-[#2ECC71] py-3.5 text-center text-base font-semibold text-white shadow-lg shadow-emerald-200/60 transition hover:bg-[#26b863]"
-        >
-          {t("form.analyze")}
-        </button>
+          <div className="mb-4 flex gap-2">
+            <button
+              type="button"
+              className={`min-h-11 flex-1 rounded-lg border-2 py-2 text-sm font-semibold transition ${
+                units === "metric"
+                  ? "border-primary bg-primary text-on-primary shadow-[var(--shadow-primary-cta)]"
+                  : inactiveToggle
+              }`}
+              onClick={() => setUnits("metric")}
+            >
+              {t("form.unitsMetric")}
+            </button>
+            <button
+              type="button"
+              className={`min-h-11 flex-1 rounded-lg border-2 py-2 text-sm font-semibold transition ${
+                units === "imperial"
+                  ? "border-primary bg-primary text-on-primary shadow-[var(--shadow-primary-cta)]"
+                  : inactiveToggle
+              }`}
+              onClick={() => setUnits("imperial")}
+            >
+              {t("form.unitsImperial")}
+            </button>
+          </div>
 
-        <div className="mt-4 flex gap-2 rounded-xl bg-zinc-100 p-3 text-xs leading-relaxed text-zinc-600">
-          <span className="text-lg leading-none text-zinc-400">ⓘ</span>
-          <p>{t("infoBox")}</p>
-        </div>
-      </section>
+          {units === "metric" ? (
+            <>
+              <FieldLabel>{t("form.heightCm")}</FieldLabel>
+              <div className="mb-4 flex items-center gap-3">
+                <input
+                  type="range"
+                  min={140}
+                  max={220}
+                  step={1}
+                  value={heightCm}
+                  onChange={(e) => setHeightCm(Number(e.target.value))}
+                  className="vt-range flex-1"
+                />
+                <span className="font-data min-w-[4rem] text-right text-xl font-bold text-brand">
+                  {heightCm}
+                </span>
+              </div>
+              <FieldLabel>{t("form.weightKg")}</FieldLabel>
+              <div className="mb-4 flex items-center gap-3">
+                <input
+                  type="range"
+                  min={40}
+                  max={150}
+                  step={0.5}
+                  value={weightKg}
+                  onChange={(e) => setWeightKg(Number(e.target.value))}
+                  className="vt-range flex-1"
+                />
+                <span className="font-data min-w-[4rem] text-right text-xl font-bold text-brand">
+                  {weightKg}
+                </span>
+              </div>
+            </>
+          ) : (
+            <>
+              <FieldLabel>{t("form.heightFtIn")}</FieldLabel>
+              <div className="font-data mb-1 flex items-center justify-end text-xl font-bold text-brand">
+                {dispFt}&apos; {dispIn}&quot;
+              </div>
+              <div className="mb-4 flex items-center gap-3">
+                <input
+                  type="range"
+                  min={56}
+                  max={90}
+                  step={1}
+                  value={heightInches}
+                  onChange={(e) => setHeightInches(Number(e.target.value))}
+                  className="vt-range flex-1"
+                />
+              </div>
+              <FieldLabel>{t("form.weightLbs")}</FieldLabel>
+              <div className="font-data mb-1 flex items-center justify-end text-xl font-bold text-brand">
+                {weightLbs}
+              </div>
+              <div className="mb-4 flex items-center gap-3">
+                <input
+                  type="range"
+                  min={90}
+                  max={400}
+                  step={1}
+                  value={weightLbs}
+                  onChange={(e) => setWeightLbs(Number(e.target.value))}
+                  className="vt-range flex-1"
+                />
+              </div>
+            </>
+          )}
+
+          <div className="mb-4 grid grid-cols-2 gap-3">
+            <div>
+              <FieldLabel>{t("form.age")}</FieldLabel>
+              <input
+                type="number"
+                min={12}
+                max={100}
+                value={age}
+                onChange={(e) => setAge(Number(e.target.value))}
+                className="vt-input"
+              />
+            </div>
+            <div>
+              <FieldLabel>{t("form.activity")}</FieldLabel>
+              <select
+                className="vt-input px-2"
+                value={activity}
+                onChange={(e) =>
+                  setActivity(e.target.value as ActivityLevel)
+                }
+              >
+                {(
+                  [
+                    "sedentary",
+                    "light",
+                    "moderate",
+                    "active",
+                    "very_active",
+                  ] as ActivityLevel[]
+                ).map((k) => (
+                  <option key={k} value={k}>
+                    {tAct(k)}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => void persistAndAnalyze()}
+            disabled={aiLoading}
+            className="min-h-12 w-full rounded-lg bg-primary py-3.5 text-center text-base font-semibold text-on-primary shadow-[var(--shadow-primary-cta)] transition hover:brightness-105 disabled:opacity-60"
+          >
+            {aiLoading ? t("form.analyzing") : t("form.analyze")}
+          </button>
+
+          <div className="mt-4 hidden gap-2 rounded-xl border border-sky-100 bg-sky-50 p-3 text-xs leading-relaxed text-sky-950 lg:flex">
+            <span aria-hidden>📍</span>
+            <p>{t("form.infoBoxWeb")}</p>
+          </div>
+          <div className="mt-4 flex gap-2 rounded-lg bg-surface-container-low p-3 text-xs leading-relaxed text-on-surface-variant lg:hidden">
+            <span className="text-lg leading-none text-secondary">ⓘ</span>
+            <p>{t("infoBox")}</p>
+          </div>
+        </section>
+
+        <aside className="hidden lg:flex lg:flex-col lg:gap-6">
+          {!analyzed ? (
+            <div className="flex min-h-[300px] flex-1 items-center justify-center rounded-2xl border-2 border-dashed border-outline-variant/45 bg-surface-container-low/50 p-8 text-center text-sm leading-relaxed text-outline">
+              {t("analysis.emptyDesktop")}
+            </div>
+          ) : (
+            <>
+              <section className="rounded-2xl border border-outline-variant/25 bg-surface p-6 shadow-[var(--shadow-card)]">
+                <p className="font-heading text-[11px] font-bold uppercase tracking-[0.15em] text-outline">
+                  {t("analysis.scoreTitle")}
+                </p>
+                <div className="mt-3 flex items-start justify-between gap-4">
+                  <span className="font-data text-5xl font-bold leading-none text-brand lg:text-6xl">
+                    {metrics.bmi}
+                  </span>
+                  <span className="shrink-0 rounded-full bg-primary-container px-4 py-2 text-sm font-bold text-brand">
+                    {metrics.classification.key === "normal"
+                      ? t("bmiCard.healthy")
+                      : categoryLabel}
+                  </span>
+                </div>
+                <div className="mt-8">
+                  <BmiScaleBar bmi={metrics.bmi} variant="zones" />
+                </div>
+              </section>
+
+              <section className="relative overflow-hidden rounded-2xl border border-outline-variant/25 bg-surface p-6 shadow-[var(--shadow-card)]">
+                <div className="absolute left-0 top-0 h-full w-1 bg-secondary" />
+                <div className="pl-4">{insightInner}</div>
+              </section>
+            </>
+          )}
+        </aside>
+      </div>
 
       {analyzed && (
-        <>
-          <section className="rounded-2xl bg-white p-5 shadow-[0_8px_30px_rgba(0,0,0,0.06)] ring-1 ring-zinc-100">
+        <div className="mt-6 flex flex-col gap-4 lg:hidden">
+          <section className="-mx-5 border-y border-outline-variant/30 bg-surface px-5 py-6 shadow-[var(--shadow-card)]">
             <BmiDonut bmi={metrics.bmi} label={t("bmiCard.scoreLabel")} />
             <div className="mt-4 flex items-center justify-between">
-              <span className="text-sm font-semibold text-zinc-700">
+              <span className="text-sm font-semibold text-on-surface">
                 {categoryLabel}
               </span>
-              <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-[#1B5E20]">
+              <span className="rounded-full bg-primary-container px-3 py-1 text-xs font-bold text-brand">
                 {metrics.classification.key === "normal"
                   ? t("bmiCard.healthy")
                   : categoryLabel}
               </span>
             </div>
             <div className="mt-6">
-              <BmiScaleBar bmi={metrics.bmi} />
+              <BmiScaleBar bmi={metrics.bmi} variant="ticks" />
             </div>
           </section>
 
-          <section className="relative overflow-hidden rounded-2xl border border-zinc-100 bg-white p-5 shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
-            <div className="absolute left-0 top-0 h-full w-1 bg-[#2196F3]" />
-            <div className="pl-3">
-              <p className="mb-2 flex items-center gap-2 text-sm font-bold text-[#2196F3]">
-                <span aria-hidden>✦</span> {t("insight.title")}
-              </p>
-              <p className="text-sm leading-relaxed text-zinc-700">
-                {metrics.insight}
-              </p>
-              <div className="mt-4 grid grid-cols-2 gap-3">
-                <div className="rounded-xl bg-zinc-50 p-3 text-center">
-                  <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">
-                    {t("insight.metabolicAge")}
-                  </p>
-                  <p className="text-lg font-bold text-[#2196F3]">
-                    {metrics.metabolicAge} {t("insight.years")}
-                  </p>
-                </div>
-                <div className="rounded-xl bg-zinc-50 p-3 text-center">
-                  <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">
-                    {t("insight.riskFactor")}
-                  </p>
-                  <p
-                    className={`text-lg font-bold ${
-                      metrics.risk === "minimal"
-                        ? "text-[#2ECC71]"
-                        : metrics.risk === "moderate"
-                          ? "text-amber-600"
-                          : "text-red-600"
-                    }`}
-                  >
-                    {tRisk(metrics.risk)}
-                  </p>
-                </div>
-              </div>
-              <p className="mt-4 text-[11px] leading-relaxed text-zinc-500">
-                {t("disclaimer.ai")}
-              </p>
-            </div>
+          <section className="relative -mx-5 overflow-hidden border-y border-outline-variant/30 bg-surface px-5 py-6 shadow-[var(--shadow-card)]">
+            <div className="absolute left-0 top-0 h-full w-1 bg-secondary" />
+            <div className="pl-4">{insightInner}</div>
           </section>
-        </>
+        </div>
       )}
     </div>
   );
@@ -459,7 +605,7 @@ export function AnalysisClient() {
 
 function FieldLabel({ children }: { children: ReactNode }) {
   return (
-    <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-zinc-500">
+    <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-outline">
       {children}
     </span>
   );

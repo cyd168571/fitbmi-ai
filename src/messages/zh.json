@@ -8,11 +8,13 @@
     "home": "首页",
     "analysis": "分析",
     "plan": "方案",
-    "standards": "标准"
+    "standards": "标准",
+    "features": "功能"
   },
   "hero": {
     "title": "FitBMI AI 分析",
-    "subtitle": "由人工智能驱动的临床人体测量与健康洞察。"
+    "subtitle": "由人工智能驱动的临床人体测量与健康洞察。",
+    "subtitleWeb": "不止于数字。填写信息后，即可获得基于本地化区域标准的即时 AI 健康解读。"
   },
   "form": {
     "sex": "生理性别",
@@ -24,12 +26,15 @@
     "activity": "活动水平",
     "country": "国家/地区",
     "analyze": "分析结果",
+    "analyzing": "分析中…",
     "heightCm": "身高（厘米）",
     "heightFtIn": "身高（英尺/英寸）",
     "weightKg": "体重（公斤）",
     "weightLbs": "体重（磅）",
     "unitsMetric": "公制",
-    "unitsImperial": "英制"
+    "unitsImperial": "英制",
+    "enterDetails": "填写您的信息",
+    "infoBoxWeb": "标准：WHO。已根据您所在地区自动检测；AI 已针对本地人群调整了风险阈值。"
   },
   "activityLevels": {
     "sedentary": "久坐",
@@ -38,13 +43,21 @@
     "active": "活跃",
     "very_active": "极高活动"
   },
-  "infoBox": "标准：WHO 全球基准并结合区域适配。根据 IP 自动推测默认选项；您可以随时手动更改国家与单位。",
+  "infoBox": "标准：WHO 全球。根据您的 IP，我们已自动检测所在地区的单位偏好。",
+  "analysis": {
+    "emptyDesktop": "填写左侧信息并点击「分析结果」，即可在此处查看 BMI。",
+    "scoreTitle": "您的 BMI 得分"
+  },
   "bmiCard": {
     "scoreLabel": "BMI 指数",
     "rangeLabel": "区间",
     "healthy": "健康",
     "scaleMin": "偏瘦",
-    "scaleMax": "肥胖"
+    "scaleMax": "肥胖",
+    "zoneUnder": "偏低",
+    "zoneHealthy": "健康",
+    "zoneOver": "超重",
+    "zoneObese": "肥胖"
   },
   "categories": {
     "underweight": "偏瘦",
@@ -60,6 +73,7 @@
   },
   "insight": {
     "title": "AI 健康解读",
+    "aiLoading": "正在生成 AI 解读…",
     "metabolicAge": "代谢年龄",
     "riskFactor": "风险因素",
     "years": "岁"
@@ -68,6 +82,14 @@
     "title": "AI 行动方案",
     "empty": "请先在「分析」页完成一次测算，以生成个性化方案。",
     "disclaimerTitle": "AI 提示"
+  },
+  "features": {
+    "col1Title": "本地化智能",
+    "col1Body": "按 WHO、亚太、日本等区域标准解读 BMI，贴合当地临床共识。",
+    "col2Title": "精细风险刻画",
+    "col2Body": "结合活动量与年龄等信息，让 BMI 不只是单一数字。",
+    "col3Title": "预测型健康 AI",
+    "col3Body": "AI 总结含义与可执行建议，并适配您所在地区——仅供参考，非诊断。"
   },
   "standards": {
     "title": "区域 BMI 标准",
@@ -80,7 +102,7 @@
     "privacy": "隐私政策",
     "medical": "医疗免责声明",
     "contact": "联系",
-    "copyright": "© {year} FitBMI AI。仅供信息参考。"
+    "copyright": "© {year} FitBMI AI。免责声明：本工具仅供信息参考，不构成医疗建议。"
   },
   "disclaimer": {
     "ai": "本内容由 AI 生成，仅供参考，不构成医疗建议，请用户自行判断或咨询专业医生。"

@@ -1,18 +1,70 @@
 @import "tailwindcss";
 
+/* Vitality Tech Aesthetic — tokens from web.md / mobile.md */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f8f9fa;
+  --foreground: #191c1d;
+  --on-surface-variant: #3d4a3d;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: #f8f9fa;
+  --color-on-background: #191c1d;
+  --color-surface: #ffffff;
+  --color-surface-dim: #d9dadb;
+  --color-surface-container-low: #f3f4f5;
+  --color-surface-container: #edeeef;
+  --color-outline: #6d7b6c;
+  --color-outline-variant: #bccbb9;
+  --color-on-surface: #191c1d;
+  --color-on-surface-variant: #3d4a3d;
+  /* Brand / UI reference: logo & headings forest green; CTAs mock #22C55E */
+  --color-brand: #166534;
+  --color-primary: #22c55e;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #86efac;
+  --color-on-primary-container: #004b1e;
+  --color-secondary: #0058be;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #2170e4;
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-tertiary-container: #ef9900;
+  --color-on-error-container: #93000a;
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-lexend), ui-sans-serif, system-ui, sans-serif;
+  --font-data: var(--font-lexend), ui-sans-serif, system-ui, sans-serif;
+  --shadow-card: 0 8px 32px rgba(0, 88, 190, 0.08);
+  --shadow-card-hover: 0 14px 40px rgba(0, 88, 190, 0.12);
+  --shadow-primary-cta: 0 10px 28px rgba(34, 197, 94, 0.35);
+  --radius-button: 0.5rem;
+  --radius-card: 1rem;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  background: var(--color-background);
+  color: var(--color-on-background);
+  font-family: var(--font-sans);
+}
+
+/* Level 2 inputs: soft gray bg, trust blue focus ring */
+.vt-input {
+  @apply w-full rounded-lg border border-outline-variant bg-surface-container-low px-4 py-3 text-sm font-semibold text-on-surface outline-none transition;
+}
+.vt-input:focus {
+  @apply border-secondary ring-2 ring-secondary/30;
+}
+
+/* Range: trust blue thumb (accent), thick track feel */
+input[type="range"].vt-range {
+  @apply h-3 w-full cursor-pointer appearance-none rounded-full bg-surface-container;
+  accent-color: var(--color-secondary);
+}
+input[type="range"].vt-range::-webkit-slider-thumb {
+  @apply h-5 w-5 cursor-grab appearance-none rounded-full border-2 border-white shadow-md;
+  background: var(--color-secondary);
+}
+input[type="range"].vt-range::-moz-range-thumb {
+  @apply h-5 w-5 cursor-grab rounded-full border-2 border-white shadow-md;
+  background: var(--color-secondary);
 }

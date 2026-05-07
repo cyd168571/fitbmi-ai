@@ -2,9 +2,14 @@ import {
   classifyBmi,
   cmToMeters,
   computeBmi,
+  type ActivityLevel,
   type BmiCategoryKey,
 } from "@/lib/bmi";
-import { generateBMIAnalysis } from "@/lib/ai/deepseek";
+import {
+  BMI_ANALYSIS_MAX_CHARS,
+  generateBMIAnalysis,
+  isDeepseekConfigured,
+} from "@/lib/ai/deepseek";
 import { standardForCountry } from "@/lib/region";
 
 const CATEGORY_EN: Record<BmiCategoryKey, string> = {
@@ -43,6 +48,54 @@ function resolveCountryCode(input: unknown): string {
   return code ?? "US";
 }
 
+function resolveCountryLabel(body: Record<string, unknown>, code: string): string {
+  if (typeof body.countryLabel === "string" && body.countryLabel.trim()) {
+    return body.countryLabel.trim();
+  }
+  if (typeof body.country === "string" && body.country.trim().length > 2) {
+    return body.country.trim();
+  }
+  return code;
+}
+
+function parseActivity(input: unknown): ActivityLevel {
+  const s = typeof input === "string" ? input : "";
+  const levels: ActivityLevel[] = [
+    "sedentary",
+    "light",
+    "moderate",
+    "active",
+    "very_active",
+  ];
+  return levels.includes(s as ActivityLevel) ? (s as ActivityLevel) : "moderate";
+}
+
+function parseSex(input: unknown): "male" | "female" {
+  return input === "female" ? "female" : "male";
+}
+
+function parseAge(input: unknown): number {
+  const n = typeof input === "number" ? input : Number(input);
+  if (!Number.isFinite(n)) return 30;
+  return Math.min(100, Math.max(12, Math.round(n)));
+}
+
+/** Infer UI locale when only `language` string is sent (legacy demo form). */
+function resolveLocale(body: Record<string, unknown>): string {
+  if (typeof body.locale === "string" && body.locale.trim()) {
+    return body.locale.trim();
+  }
+  const lang = typeof body.language === "string" ? body.language.toLowerCase() : "";
+  if (lang.includes("中文") || lang.includes("chinese")) return "zh";
+  if (lang.includes("日本語") || lang.includes("japanese")) return "ja";
+  if (lang.includes("한국") || lang.includes("korean")) return "ko";
+  if (lang.includes("português") || lang.includes("portuguese")) return "pt";
+  if (lang.includes("español") || lang.includes("spanish")) return "es";
+  if (lang.includes("français") || lang.includes("french")) return "fr";
+  if (lang.includes("deutsch") || lang.includes("german")) return "de";
+  return "en";
+}
+
 export async function POST(req: Request) {
   try {
     let body: Record<string, unknown>;
@@ -66,51 +119,66 @@ export async function POST(req: Request) {
       );
     }
 
-    const standard = standardForCountry(
-      resolveCountryCode(body.country ?? body.countryCode),
-    );
+    const countryCode = resolveCountryCode(body.countryCode ?? body.country);
+    const standard = standardForCountry(countryCode);
     const heightM = cmToMeters(heightCm);
     const bmi = computeBmi(weightKg, heightM);
     const classification = classifyBmi(bmi, standard);
     const category = CATEGORY_EN[classification.key];
 
-    const countryLabel =
-      typeof body.country === "string" && body.country.trim()
-        ? body.country.trim()
-        : "Unknown";
-    const language =
-      typeof body.language === "string" && body.language.trim()
-        ? body.language.trim()
-        : "English";
-    const gender =
-      typeof body.gender === "string" ? body.gender : undefined;
-    const age = typeof body.age === "number" ? body.age : undefined;
+    const countryLabel = resolveCountryLabel(body, countryCode);
+    const locale = resolveLocale(body);
 
     let analysis: string;
-    if (process.env.DEEPSEEK_API_KEY) {
+    if (isDeepseekConfigured()) {
       try {
-        const text = await generateBMIAnalysis({
+        analysis = await generateBMIAnalysis({
           bmi,
-          category,
-          country: countryLabel,
-          language,
-          gender,
-          age,
+          categoryKey: classification.key,
+          categoryLabelEn: category,
+          bmiStandard: standard,
+          countryCode,
+          countryLabel,
+          locale,
+          sex: parseSex(body.sex),
+          age: parseAge(body.age),
+          activity: parseActivity(body.activity),
         });
-        analysis = text?.trim() || "";
       } catch (e) {
         console.error("Deepseek error:", e);
-        analysis = "";
+        const errText = e instanceof Error ? e.message : String(e);
+        const noBalance =
+          errText.includes("402") || /insufficient balance/i.test(errText);
+        if (noBalance) {
+          analysis = locale.startsWith("zh")
+            ? `BMI 为 ${bmi}（${category}）。Deepseek 返回账户余额不足，请在 Deepseek 控制台充值后再试。非医疗诊断。`
+            : `BMI ${bmi} (${category}). Deepseek returned insufficient account balance—add credits in the Deepseek console, then try again. Informational only.`;
+        } else {
+          analysis = "";
+        }
       }
     } else {
       analysis = "";
     }
 
     if (!analysis) {
-      analysis = `BMI is ${bmi} (${category}). This is a short summary when the AI service is unavailable. For personalized guidance, set DEEPSEEK_API_KEY and try again. Not a medical diagnosis.`;
+      if (isDeepseekConfigured()) {
+        analysis = locale.startsWith("zh")
+          ? `BMI 为 ${bmi}（${category}）。AI 分析暂不可用，请稍后重试。非医疗诊断，仅供参考。`
+          : `BMI ${bmi} (${category}). AI analysis is temporarily unavailable. Not medical advice.`;
+      } else {
+        analysis = locale.startsWith("zh")
+          ? `BMI 为 ${bmi}（${category}）。当前无法连接 AI 分析服务，请在 .env.local 中配置 DEEPSEEK_API_KEY 或 Deepseek_api_key 后重试。非医疗诊断，仅供参考。`
+          : `BMI ${bmi} (${category}). AI analysis unavailable — set DEEPSEEK_API_KEY or Deepseek_api_key in .env.local. Informational only, not medical advice.`;
+      }
     }
 
-    return Response.json({ bmi, category, analysis });
+    return Response.json({
+      bmi,
+      category,
+      analysis,
+      maxChars: BMI_ANALYSIS_MAX_CHARS,
+    });
   } catch (error) {
     console.error("API ERROR:", error);
     return Response.json({ error: String(error) }, { status: 500 });

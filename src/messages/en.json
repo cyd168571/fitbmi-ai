@@ -8,11 +8,13 @@
     "home": "Home",
     "analysis": "Analysis",
     "plan": "Plan",
-    "standards": "Standards"
+    "standards": "Standards",
+    "features": "Features"
   },
   "hero": {
     "title": "FitBMI AI Analysis",
-    "subtitle": "Advanced clinical anthropometrics powered by artificial intelligence."
+    "subtitle": "Advanced clinical anthropometrics powered by artificial intelligence.",
+    "subtitleWeb": "Get beyond simple numbers. Enter your details for instant AI-powered health insights based on localized regional standards."
   },
   "form": {
     "sex": "Biological sex",
@@ -24,12 +26,15 @@
     "activity": "Activity level",
     "country": "Country / region",
     "analyze": "Analyze Results",
+    "analyzing": "Analyzing…",
     "heightCm": "Height (cm)",
     "heightFtIn": "Height (ft/in)",
     "weightKg": "Weight (kg)",
     "weightLbs": "Weight (lbs)",
     "unitsMetric": "Metric",
-    "unitsImperial": "Imperial"
+    "unitsImperial": "Imperial",
+    "enterDetails": "Enter Your Details",
+    "infoBoxWeb": "Standard: WHO Standard. Auto-detected for your region. AI has adjusted risk thresholds for your local population profile."
   },
   "activityLevels": {
     "sedentary": "Sedentary",
@@ -38,13 +43,21 @@
     "active": "Active",
     "very_active": "Very active"
   },
-  "infoBox": "Standard: WHO Global / regional adapters. Based on your IP, we auto-detect defaults; you can override country and units anytime.",
+  "infoBox": "Standard: WHO Global. Based on your IP, we have auto-detected your region's metric preferences.",
+  "analysis": {
+    "emptyDesktop": "Enter your details and click Analyze Results to see your BMI score here.",
+    "scoreTitle": "YOUR BMI SCORE"
+  },
   "bmiCard": {
     "scoreLabel": "BMI SCORE",
     "rangeLabel": "Range",
     "healthy": "Healthy",
     "scaleMin": "Underweight",
-    "scaleMax": "Obesity"
+    "scaleMax": "Obesity",
+    "zoneUnder": "UNDER",
+    "zoneHealthy": "HEALTHY",
+    "zoneOver": "OVER",
+    "zoneObese": "OBESE"
   },
   "categories": {
     "underweight": "Underweight",
@@ -60,6 +73,7 @@
   },
   "insight": {
     "title": "AI Health Insight",
+    "aiLoading": "Generating AI insight…",
     "metabolicAge": "Metabolic age",
     "riskFactor": "Risk factor",
     "years": "yrs"
@@ -68,6 +82,14 @@
     "title": "AI Action Plan",
     "empty": "Run an analysis on the Analysis tab to generate a personalized plan here.",
     "disclaimerTitle": "AI notice"
+  },
+  "features": {
+    "col1Title": "Localized Intelligence",
+    "col1Body": "Region-specific BMI cut-offs (WHO, Asian-Pacific, Japan) so interpretations match clinical norms where you live.",
+    "col2Title": "Precision Risk Scoring",
+    "col2Body": "Combines BMI category with activity and age cues for clearer metabolic context—not just a single number.",
+    "col3Title": "Predictive Health AI",
+    "col3Body": "AI summarizes implications and practical next steps tuned to your locale—informational, not a diagnosis."
   },
   "standards": {
     "title": "Regional BMI standards",
@@ -80,7 +102,7 @@
     "privacy": "Privacy Policy",
     "medical": "Medical Disclaimer",
     "contact": "Contact",
-    "copyright": "© {year} FitBMI AI. Informational use only."
+    "copyright": "© {year} FitBMI AI. Standardized Medical Disclaimer: This AI tool is for informational purposes only and does not constitute medical advice."
   },
   "disclaimer": {
     "ai": "AI-generated content. This information is for reference only and should not be considered medical advice. Please use your own judgment or consult a healthcare professional."

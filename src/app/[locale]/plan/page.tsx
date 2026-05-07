@@ -33,19 +33,23 @@ export default function PlanPage() {
 
   return (
     <PageShell showHero={false}>
-      <div className="px-4 pb-10 pt-2">
-        <h2 className="text-xl font-bold text-[#1B5E20]">{t("plan.title")}</h2>
-        <div className="mt-4 rounded-2xl border border-zinc-100 bg-white p-5 shadow-sm">
+      <div className="pb-10 pt-2">
+        <h2 className="font-heading text-xl font-semibold text-primary md:text-2xl">
+          {t("plan.title")}
+        </h2>
+        <div className="mt-4 rounded-2xl border border-outline-variant/30 bg-surface p-5 shadow-[var(--shadow-card)] ring-1 ring-outline-variant/20">
           {text ? (
-            <p className="text-sm leading-relaxed text-zinc-700">{text}</p>
+            <p className="text-sm leading-relaxed text-on-surface-variant">
+              {text}
+            </p>
           ) : (
-            <p className="text-sm text-zinc-500">{t("plan.empty")}</p>
+            <p className="text-sm text-outline">{t("plan.empty")}</p>
           )}
         </div>
-        <p className="mt-4 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
+        <p className="mt-4 text-[11px] font-semibold uppercase tracking-wide text-outline">
           {t("plan.disclaimerTitle")}
         </p>
-        <p className="mt-1 text-xs leading-relaxed text-zinc-500">
+        <p className="mt-1 text-xs leading-relaxed text-outline">
           {t("disclaimer.ai")}
         </p>
       </div>

@@ -11,11 +11,11 @@ export default async function AboutPage({
 
   return (
     <PageShell showHero={false}>
-      <div className="px-4 pb-10 pt-4">
-        <h1 className="text-xl font-bold text-[#1B5E20]">
+      <div className="pb-10 pt-4">
+        <h1 className="font-heading text-xl font-semibold text-primary md:text-2xl">
           {t("pages.about.title")}
         </h1>
-        <p className="mt-4 text-sm leading-relaxed text-zinc-700">
+        <p className="mt-4 max-w-3xl text-sm leading-relaxed text-on-surface-variant md:text-base md:leading-7">
           {t("pages.about.body")}
         </p>
       </div>

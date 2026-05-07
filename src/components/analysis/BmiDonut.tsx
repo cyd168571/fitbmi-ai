@@ -3,10 +3,10 @@
 import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
 
 const SLICES = [
-  { id: "u", from: 15, to: 18.5, color: "#F48FB1" },
-  { id: "n", from: 18.5, to: 25, color: "#66BB6A" },
-  { id: "o", from: 25, to: 30, color: "#FFCA28" },
-  { id: "b", from: 30, to: 40, color: "#E53935" },
+  { id: "u", from: 15, to: 18.5, color: "#f472b6" },
+  { id: "n", from: 18.5, to: 25, color: "#22c55e" },
+  { id: "o", from: 25, to: 30, color: "#fbbf24" },
+  { id: "b", from: 30, to: 40, color: "#ef4444" },
 ] as const;
 
 const chartData = SLICES.map((s) => ({
@@ -45,8 +45,8 @@ export function BmiDonut({ bmi, label }: Props) {
         </PieChart>
       </ResponsiveContainer>
       <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
-        <p className="text-3xl font-bold text-[#1B5E20]">{bmi}</p>
-        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+        <p className="font-data text-3xl font-bold text-brand">{bmi}</p>
+        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-outline">
           {label}
         </p>
       </div>

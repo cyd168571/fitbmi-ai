@@ -15,30 +15,37 @@ const FLAGS: Record<string, string> = {
   de: "🇩🇪",
 };
 
-const LABELS: Record<string, string> = {
+const CODES: Record<string, string> = {
   en: "EN",
-  zh: "中文",
-  ja: "日本語",
-  ko: "한국어",
+  zh: "ZH",
+  ja: "JA",
+  ko: "KO",
   pt: "PT",
   es: "ES",
   fr: "FR",
   de: "DE",
 };
 
+/** Pill chip with flag + ISO-style code; native select overlaid for accessibility */
 export function LanguageSwitcher() {
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
+  const flag = FLAGS[locale] ?? "🌐";
+  const code = CODES[locale] ?? locale.toUpperCase().slice(0, 2);
 
   return (
-    <div className="relative">
+    <div className="relative inline-flex h-10 min-w-[6rem] items-center justify-center gap-1.5 rounded-full border border-outline-variant bg-surface px-3 py-1.5 text-sm font-semibold text-on-surface shadow-[var(--shadow-card)]">
+      <span aria-hidden className="pointer-events-none flex items-center gap-1.5">
+        <span>{flag}</span>
+        <span>{code}</span>
+      </span>
       <label className="sr-only" htmlFor="locale-select">
         Language
       </label>
       <select
         id="locale-select"
-        className="flex cursor-pointer items-center gap-1 rounded-full border border-zinc-200 bg-white py-1.5 pl-2 pr-7 text-sm font-medium text-zinc-800 shadow-sm outline-none transition hover:border-[#2ECC71]"
+        className="absolute inset-0 cursor-pointer rounded-full opacity-0"
         value={locale}
         onChange={(e) => {
           const next = e.target.value;
@@ -47,13 +54,10 @@ export function LanguageSwitcher() {
       >
         {routing.locales.map((loc) => (
           <option key={loc} value={loc}>
-            {FLAGS[loc] ?? "🌐"} {LABELS[loc] ?? loc.toUpperCase()}
+            {FLAGS[loc] ?? "🌐"} {CODES[loc] ?? loc.toUpperCase()}
           </option>
         ))}
       </select>
-      <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-xs text-zinc-400">
-        ▾
-      </span>
     </div>
   );
 }
