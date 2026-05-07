@@ -275,38 +275,38 @@ export function AnalysisClient() {
 
   const insightInner = (
     <>
-      <p className="mb-2 flex items-center gap-2 text-sm font-bold text-secondary">
-        <span aria-hidden className="text-secondary">
+      <p className="mb-2 flex min-w-0 flex-wrap items-center gap-2 text-sm font-bold text-secondary">
+        <span aria-hidden className="shrink-0 text-secondary">
           ✦
-        </span>{" "}
-        {t("insight.title")}
+        </span>
+        <span className="min-w-0">{t("insight.title")}</span>
       </p>
-      <div className="rounded-xl bg-zinc-50 p-4 lg:bg-white lg:p-0 lg:shadow-none">
+      <div className="min-w-0 max-w-full rounded-xl bg-zinc-50 p-4 lg:bg-white lg:p-0 lg:shadow-none">
         {aiLoading ? (
           <p className="animate-pulse text-sm leading-relaxed text-outline">
             {t("insight.aiLoading")}
           </p>
         ) : (
-          <p className="text-sm leading-relaxed text-on-surface-variant">
+          <p className="whitespace-pre-wrap break-words text-sm leading-relaxed text-on-surface-variant [overflow-wrap:anywhere]">
             {aiInsight ?? metrics.insight}
           </p>
         )}
       </div>
-      <div className="mt-4 grid grid-cols-2 gap-3">
-        <div className="rounded-lg bg-surface-container-low p-3 text-center ring-1 ring-outline-variant/20">
+      <div className="mt-4 grid min-w-0 grid-cols-2 gap-3">
+        <div className="min-w-0 rounded-lg bg-surface-container-low p-3 text-center ring-1 ring-outline-variant/20">
           <p className="text-[10px] font-semibold uppercase tracking-wide text-outline">
             {t("insight.metabolicAge")}
           </p>
-          <p className="font-data text-lg font-bold text-secondary">
+          <p className="break-words font-data text-lg font-bold text-secondary">
             {metrics.metabolicAge} {t("insight.years")}
           </p>
         </div>
-        <div className="rounded-lg bg-surface-container-low p-3 text-center ring-1 ring-outline-variant/20">
+        <div className="min-w-0 rounded-lg bg-surface-container-low p-3 text-center ring-1 ring-outline-variant/20">
           <p className="text-[10px] font-semibold uppercase tracking-wide text-outline">
             {t("insight.riskFactor")}
           </p>
           <p
-            className={`font-data text-lg font-bold ${
+            className={`break-words font-data text-lg font-bold ${
               metrics.risk === "minimal"
                 ? "text-primary"
                 : metrics.risk === "moderate"
@@ -318,16 +318,16 @@ export function AnalysisClient() {
           </p>
         </div>
       </div>
-      <p className="mt-4 text-[11px] leading-relaxed text-outline italic lg:text-xs">
+      <p className="mt-4 break-words text-[11px] leading-relaxed text-outline italic lg:text-xs [overflow-wrap:anywhere]">
         {t("disclaimer.ai")}
       </p>
     </>
   );
 
   return (
-    <div className="pb-6 pt-2">
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-start lg:gap-10">
-        <section className="rounded-2xl bg-surface p-5 shadow-[var(--shadow-card)] ring-1 ring-outline-variant/25">
+    <div className="min-w-0 pb-6 pt-2">
+      <div className="grid min-w-0 grid-cols-1 gap-6 lg:grid-cols-2 lg:items-start lg:gap-10">
+        <section className="min-w-0 rounded-2xl bg-surface p-5 shadow-[var(--shadow-card)] ring-1 ring-outline-variant/25">
           <div className="mb-5 hidden items-center gap-2 lg:flex">
             <span className="text-xl" aria-hidden>
               📋
@@ -539,7 +539,7 @@ export function AnalysisClient() {
           </div>
         </section>
 
-        <aside className="hidden lg:flex lg:flex-col lg:gap-6">
+        <aside className="hidden min-w-0 lg:flex lg:flex-col lg:gap-6">
           {!analyzed ? (
             <div className="flex min-h-[300px] flex-1 items-center justify-center rounded-2xl border-2 border-dashed border-outline-variant/45 bg-surface-container-low/50 p-8 text-center text-sm leading-relaxed text-outline">
               {t("analysis.emptyDesktop")}
@@ -565,9 +565,12 @@ export function AnalysisClient() {
                 </div>
               </section>
 
-              <section className="relative overflow-hidden rounded-2xl border border-outline-variant/25 bg-surface p-6 shadow-[var(--shadow-card)]">
-                <div className="absolute left-0 top-0 h-full w-1 bg-secondary" />
-                <div className="pl-4">{insightInner}</div>
+              <section className="relative min-w-0 rounded-2xl border border-outline-variant/25 bg-surface p-6 shadow-[var(--shadow-card)]">
+                <div
+                  className="absolute bottom-0 left-0 top-0 w-1 rounded-l-2xl bg-secondary"
+                  aria-hidden
+                />
+                <div className="min-w-0 pl-4">{insightInner}</div>
               </section>
             </>
           )}
@@ -575,8 +578,8 @@ export function AnalysisClient() {
       </div>
 
       {analyzed && (
-        <div className="mt-6 flex flex-col gap-4 lg:hidden">
-          <section className="-mx-5 border-y border-outline-variant/30 bg-surface px-5 py-6 shadow-[var(--shadow-card)]">
+        <div className="mt-6 flex min-w-0 flex-col gap-4 lg:hidden">
+          <section className="-mx-5 min-w-0 border-y border-outline-variant/30 bg-surface px-5 py-6 shadow-[var(--shadow-card)]">
             <BmiDonut bmi={metrics.bmi} label={t("bmiCard.scoreLabel")} />
             <div className="mt-4 flex items-center justify-between">
               <span className="text-sm font-semibold text-on-surface">
@@ -593,9 +596,12 @@ export function AnalysisClient() {
             </div>
           </section>
 
-          <section className="relative -mx-5 overflow-hidden border-y border-outline-variant/30 bg-surface px-5 py-6 shadow-[var(--shadow-card)]">
-            <div className="absolute left-0 top-0 h-full w-1 bg-secondary" />
-            <div className="pl-4">{insightInner}</div>
+          <section className="relative -mx-5 min-w-0 border-y border-outline-variant/30 bg-surface px-5 py-6 shadow-[var(--shadow-card)]">
+            <div
+              className="absolute bottom-0 left-0 top-0 w-1 bg-secondary"
+              aria-hidden
+            />
+            <div className="min-w-0 pl-4">{insightInner}</div>
           </section>
         </div>
       )}
