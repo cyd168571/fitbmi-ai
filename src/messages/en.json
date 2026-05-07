@@ -1,0 +1,142 @@
+{
+  "meta": {
+    "title": "FitBMI AI — BMI & health insight",
+    "description": "AI-assisted BMI analysis with regional standards and actionable guidance."
+  },
+  "brand": "FitBMI AI",
+  "nav": {
+    "home": "Home",
+    "analysis": "Analysis",
+    "plan": "Plan",
+    "standards": "Standards"
+  },
+  "hero": {
+    "title": "FitBMI AI Analysis",
+    "subtitle": "Advanced clinical anthropometrics powered by artificial intelligence."
+  },
+  "form": {
+    "sex": "Biological sex",
+    "male": "Male",
+    "female": "Female",
+    "height": "Height",
+    "weight": "Weight",
+    "age": "Age",
+    "activity": "Activity level",
+    "country": "Country / region",
+    "analyze": "Analyze Results",
+    "heightCm": "Height (cm)",
+    "heightFtIn": "Height (ft/in)",
+    "weightKg": "Weight (kg)",
+    "weightLbs": "Weight (lbs)",
+    "unitsMetric": "Metric",
+    "unitsImperial": "Imperial"
+  },
+  "activityLevels": {
+    "sedentary": "Sedentary",
+    "light": "Light",
+    "moderate": "Moderate",
+    "active": "Active",
+    "very_active": "Very active"
+  },
+  "infoBox": "Standard: WHO Global / regional adapters. Based on your IP, we auto-detect defaults; you can override country and units anytime.",
+  "bmiCard": {
+    "scoreLabel": "BMI SCORE",
+    "rangeLabel": "Range",
+    "healthy": "Healthy",
+    "scaleMin": "Underweight",
+    "scaleMax": "Obesity"
+  },
+  "categories": {
+    "underweight": "Underweight",
+    "normal": "Normal range",
+    "overweight": "Overweight",
+    "overweightRisk": "Overweight risk",
+    "obese": "Obese"
+  },
+  "risk": {
+    "minimal": "Minimal",
+    "moderate": "Moderate",
+    "high": "High"
+  },
+  "insight": {
+    "title": "AI Health Insight",
+    "metabolicAge": "Metabolic age",
+    "riskFactor": "Risk factor",
+    "years": "yrs"
+  },
+  "plan": {
+    "title": "AI Action Plan",
+    "empty": "Run an analysis on the Analysis tab to generate a personalized plan here.",
+    "disclaimerTitle": "AI notice"
+  },
+  "standards": {
+    "title": "Regional BMI standards",
+    "who": "WHO — global adult cut-offs for overweight (25+) and obesity (30+).",
+    "asian": "Asia-Pacific — often uses 23–24.9 as overweight risk and 25+ as obesity for Asian populations.",
+    "japan": "Japan — applies Asia-Pacific clinical cuts and may reference cosmetic “beauty/model” weight bands for context only."
+  },
+  "footer": {
+    "about": "About",
+    "privacy": "Privacy Policy",
+    "medical": "Medical Disclaimer",
+    "contact": "Contact",
+    "copyright": "© {year} FitBMI AI. Informational use only."
+  },
+  "disclaimer": {
+    "ai": "AI-generated content. This information is for reference only and should not be considered medical advice. Please use your own judgment or consult a healthcare professional."
+  },
+  "countries": {
+    "US": "United States",
+    "GB": "United Kingdom",
+    "CA": "Canada",
+    "AU": "Australia",
+    "DE": "Germany",
+    "FR": "France",
+    "BR": "Brazil",
+    "PT": "Portugal",
+    "ES": "Spain",
+    "MX": "Mexico",
+    "JP": "Japan",
+    "KR": "Korea",
+    "CN": "China",
+    "TW": "Taiwan",
+    "HK": "Hong Kong",
+    "SG": "Singapore",
+    "IN": "India",
+    "RU": "Russia",
+    "IT": "Italy",
+    "NL": "Netherlands",
+    "SE": "Sweden",
+    "NO": "Norway",
+    "DK": "Denmark",
+    "FI": "Finland",
+    "PL": "Poland",
+    "AR": "Argentina",
+    "CL": "Chile",
+    "CO": "Colombia",
+    "AE": "United Arab Emirates",
+    "SA": "Saudi Arabia",
+    "EG": "Egypt",
+    "ZA": "South Africa",
+    "NG": "Nigeria",
+    "OTHER": "Other / not listed"
+  },
+  "pages": {
+    "about": {
+      "title": "About FitBMI AI",
+      "body": "FitBMI AI combines BMI math with regional standards and rule-based health narratives to help you understand weight status—without replacing a clinician."
+    },
+    "privacy": {
+      "title": "Privacy",
+      "body": "We store preferences locally in your browser where possible. Deployments may process basic analytics; review your host’s privacy policy."
+    },
+    "medical": {
+      "title": "Medical disclaimer",
+      "body": "This tool is not a medical device and does not diagnose disease. Seek professional advice for any health concern."
+    },
+    "contact": {
+      "title": "Contact",
+      "body": "For product inquiries, reach out through your deployment maintainer."
+    }
+  }
+}

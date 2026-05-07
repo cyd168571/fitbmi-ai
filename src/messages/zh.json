@@ -1,0 +1,142 @@
+{
+  "meta": {
+    "title": "FitBMI AI — BMI 与健康解读",
+    "description": "结合区域标准与可执行建议的 BMI 智能分析。"
+  },
+  "brand": "FitBMI AI",
+  "nav": {
+    "home": "首页",
+    "analysis": "分析",
+    "plan": "方案",
+    "standards": "标准"
+  },
+  "hero": {
+    "title": "FitBMI AI 分析",
+    "subtitle": "由人工智能驱动的临床人体测量与健康洞察。"
+  },
+  "form": {
+    "sex": "生理性别",
+    "male": "男",
+    "female": "女",
+    "height": "身高",
+    "weight": "体重",
+    "age": "年龄",
+    "activity": "活动水平",
+    "country": "国家/地区",
+    "analyze": "分析结果",
+    "heightCm": "身高（厘米）",
+    "heightFtIn": "身高（英尺/英寸）",
+    "weightKg": "体重（公斤）",
+    "weightLbs": "体重（磅）",
+    "unitsMetric": "公制",
+    "unitsImperial": "英制"
+  },
+  "activityLevels": {
+    "sedentary": "久坐",
+    "light": "轻度活动",
+    "moderate": "中度活动",
+    "active": "活跃",
+    "very_active": "极高活动"
+  },
+  "infoBox": "标准：WHO 全球基准并结合区域适配。根据 IP 自动推测默认选项；您可以随时手动更改国家与单位。",
+  "bmiCard": {
+    "scoreLabel": "BMI 指数",
+    "rangeLabel": "区间",
+    "healthy": "健康",
+    "scaleMin": "偏瘦",
+    "scaleMax": "肥胖"
+  },
+  "categories": {
+    "underweight": "偏瘦",
+    "normal": "正常范围",
+    "overweight": "超重",
+    "overweightRisk": "超重风险",
+    "obese": "肥胖"
+  },
+  "risk": {
+    "minimal": "较低",
+    "moderate": "中等",
+    "high": "较高"
+  },
+  "insight": {
+    "title": "AI 健康解读",
+    "metabolicAge": "代谢年龄",
+    "riskFactor": "风险因素",
+    "years": "岁"
+  },
+  "plan": {
+    "title": "AI 行动方案",
+    "empty": "请先在「分析」页完成一次测算，以生成个性化方案。",
+    "disclaimerTitle": "AI 提示"
+  },
+  "standards": {
+    "title": "区域 BMI 标准",
+    "who": "WHO — 全球成人常用切点：超重 25+，肥胖 30+。",
+    "asian": "亚太共识 — 常用 23–24.9 作为超重风险，25+ 为肥胖（适用于部分亚洲人群）。",
+    "japan": "日本 — 临床切点遵循亚太共识，并可能补充美容/模特体重参考（仅供科普）。"
+  },
+  "footer": {
+    "about": "关于",
+    "privacy": "隐私政策",
+    "medical": "医疗免责声明",
+    "contact": "联系",
+    "copyright": "© {year} FitBMI AI。仅供信息参考。"
+  },
+  "disclaimer": {
+    "ai": "本内容由 AI 生成，仅供参考，不构成医疗建议，请用户自行判断或咨询专业医生。"
+  },
+  "countries": {
+    "US": "美国",
+    "GB": "英国",
+    "CA": "加拿大",
+    "AU": "澳大利亚",
+    "DE": "德国",
+    "FR": "法国",
+    "BR": "巴西",
+    "PT": "葡萄牙",
+    "ES": "西班牙",
+    "MX": "墨西哥",
+    "JP": "日本",
+    "KR": "韩国",
+    "CN": "中国",
+    "TW": "台湾",
+    "HK": "香港",
+    "SG": "新加坡",
+    "IN": "印度",
+    "RU": "俄罗斯",
+    "IT": "意大利",
+    "NL": "荷兰",
+    "SE": "瑞典",
+    "NO": "挪威",
+    "DK": "丹麦",
+    "FI": "芬兰",
+    "PL": "波兰",
+    "AR": "阿根廷",
+    "CL": "智利",
+    "CO": "哥伦比亚",
+    "AE": "阿联酋",
+    "SA": "沙特",
+    "EG": "埃及",
+    "ZA": "南非",
+    "NG": "尼日利亚",
+    "OTHER": "其他"
+  },
+  "pages": {
+    "about": {
+      "title": "关于 FitBMI AI",
+      "body": "FitBMI AI 将 BMI 计算与区域标准、规则化健康叙事结合，帮助理解体重状态——不能替代医生诊疗。"
+    },
+    "privacy": {
+      "title": "隐私",
+      "body": "我们尽可能仅在浏览器本地保存偏好。部署环境若启用统计，请参阅托管方隐私说明。"
+    },
+    "medical": {
+      "title": "医疗免责声明",
+      "body": "本工具不是医疗器械，不能用于诊断疾病。有任何健康问题请咨询专业人员。"
+    },
+    "contact": {
+      "title": "联系",
+      "body": "如需合作或反馈，请联系您的部署维护方。"
+    }
+  }
+}
