@@ -25,7 +25,7 @@
     "age": "年龄",
     "activity": "活动水平",
     "country": "国家/地区",
-    "analyze": "分析结果",
+    "analyze": "查看BMI",
     "analyzing": "分析中…",
     "heightCm": "身高（厘米）",
     "heightFtIn": "身高（英尺/英寸）",
@@ -45,7 +45,8 @@
   },
   "infoBox": "标准：WHO 全球。根据您的 IP，我们已自动检测所在地区的单位偏好。",
   "analysis": {
-    "emptyDesktop": "填写左侧信息并点击「分析结果」，即可在此处查看 BMI。",
+    "emptyDesktop": "填写左侧信息并点击「查看BMI」，先在此处查看 BMI；再点击「下一步：AI分析结果」获取 AI 健康解读。",
+    "nextAiStep": "下一步：AI分析结果",
     "scoreTitle": "您的 BMI 得分"
   },
   "bmiCard": {

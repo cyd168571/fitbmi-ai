@@ -92,7 +92,8 @@ export function AnalysisClient() {
   const [heightInches, setHeightInches] = useState(70);
   const [weightLbs, setWeightLbs] = useState(165);
 
-  const [analyzed, setAnalyzed] = useState(false);
+  const [bmiReady, setBmiReady] = useState(false);
+  const [aiStepOpened, setAiStepOpened] = useState(false);
   const [aiInsight, setAiInsight] = useState<string | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
 
@@ -194,13 +195,12 @@ export function AnalysisClient() {
 
   const { ft: dispFt, inch: dispIn } = splitInches(heightInches);
 
-  async function persistAndAnalyze() {
+  function buildSnapshot(): Snapshot {
     const heightSnap =
       units === "metric" ? heightCm : cmFromInches(heightInches);
     const weightSnap =
       units === "metric" ? weightKg : lbsToKg(weightLbs);
-
-    const snap: Snapshot = {
+    return {
       countryCode,
       sex,
       age,
@@ -212,11 +212,14 @@ export function AnalysisClient() {
       standard,
       analyzedAt: new Date().toISOString(),
     };
+  }
 
+  function persistBmiOnly() {
+    const snap = buildSnapshot();
     setAiInsight(null);
-    setAnalyzed(true);
-    setAiLoading(true);
-
+    setAiStepOpened(false);
+    setBmiReady(true);
+    setAiLoading(false);
     try {
       localStorage.setItem(STORAGE, JSON.stringify(snap));
       localStorage.setItem(
@@ -230,14 +233,21 @@ export function AnalysisClient() {
     } catch {
       /* ignore */
     }
+  }
+
+  async function runAiAnalysis() {
+    const snap = buildSnapshot();
+    setAiStepOpened(true);
+    setAiLoading(true);
+    setAiInsight(null);
 
     try {
       const res = await fetch("/api/bmi/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          height: heightSnap,
-          weight: weightSnap,
+          height: snap.heightCm,
+          weight: snap.weightKg,
           countryCode,
           countryLabel: tCountries(countryCode),
           locale,
@@ -530,11 +540,10 @@ export function AnalysisClient() {
 
           <button
             type="button"
-            onClick={() => void persistAndAnalyze()}
-            disabled={aiLoading}
-            className="min-h-12 w-full rounded-lg bg-primary py-3.5 text-center text-base font-semibold text-on-primary shadow-[var(--shadow-primary-cta)] transition hover:brightness-105 disabled:opacity-60"
+            onClick={persistBmiOnly}
+            className="min-h-12 w-full rounded-lg bg-primary py-3.5 text-center text-base font-semibold text-on-primary shadow-[var(--shadow-primary-cta)] transition hover:brightness-105"
           >
-            {aiLoading ? t("form.analyzing") : t("form.analyze")}
+            {t("form.analyze")}
           </button>
 
           <div className="mt-4 hidden gap-2 rounded-xl border border-sky-100 bg-sky-50 p-3 text-xs leading-relaxed text-sky-950 lg:flex">
@@ -548,7 +557,7 @@ export function AnalysisClient() {
         </section>
 
         <aside className="hidden min-w-0 lg:flex lg:flex-col lg:gap-6">
-          {!analyzed ? (
+          {!bmiReady ? (
             <div className="flex min-h-[300px] flex-1 items-center justify-center rounded-2xl border-2 border-dashed border-outline-variant/45 bg-surface-container-low/50 p-8 text-center text-sm leading-relaxed text-outline">
               {t("analysis.emptyDesktop")}
             </div>
@@ -573,19 +582,30 @@ export function AnalysisClient() {
                 </div>
               </section>
 
-              <section className="relative min-w-0 rounded-2xl border border-outline-variant/25 bg-surface p-6 shadow-[var(--shadow-card)]">
-                <div
-                  className="absolute bottom-0 left-0 top-0 w-1 rounded-l-2xl bg-secondary"
-                  aria-hidden
-                />
-                <div className="min-w-0 pl-4">{insightInner}</div>
-              </section>
+              {!aiStepOpened ? (
+                <button
+                  type="button"
+                  onClick={() => void runAiAnalysis()}
+                  disabled={aiLoading}
+                  className="min-h-12 w-full rounded-lg border-2 border-primary bg-surface py-3.5 text-center text-base font-semibold text-primary shadow-sm transition hover:bg-primary-container/30 disabled:opacity-60"
+                >
+                  {aiLoading ? t("form.analyzing") : t("analysis.nextAiStep")}
+                </button>
+              ) : (
+                <section className="relative min-w-0 rounded-2xl border border-outline-variant/25 bg-surface p-6 shadow-[var(--shadow-card)]">
+                  <div
+                    className="absolute bottom-0 left-0 top-0 w-1 rounded-l-2xl bg-secondary"
+                    aria-hidden
+                  />
+                  <div className="min-w-0 pl-4">{insightInner}</div>
+                </section>
+              )}
             </>
           )}
         </aside>
       </div>
 
-      {analyzed && (
+      {bmiReady && (
         <div className="mt-6 flex min-w-0 flex-col gap-4 lg:hidden">
           <section className="-mx-5 min-w-0 border-y border-outline-variant/30 bg-surface px-5 py-6 shadow-[var(--shadow-card)]">
             <BmiDonut bmi={metrics.bmi} label={t("bmiCard.scoreLabel")} />
@@ -604,13 +624,24 @@ export function AnalysisClient() {
             </div>
           </section>
 
-          <section className="relative -mx-5 min-w-0 border-y border-outline-variant/30 bg-surface px-5 py-6 shadow-[var(--shadow-card)]">
-            <div
-              className="absolute bottom-0 left-0 top-0 w-1 bg-secondary"
-              aria-hidden
-            />
-            <div className="min-w-0 pl-4">{insightInner}</div>
-          </section>
+          {!aiStepOpened ? (
+            <button
+              type="button"
+              onClick={() => void runAiAnalysis()}
+              disabled={aiLoading}
+              className="min-h-12 w-full rounded-lg border-2 border-primary bg-surface py-3.5 text-center text-base font-semibold text-primary shadow-sm transition hover:bg-primary-container/30 disabled:opacity-60"
+            >
+              {aiLoading ? t("form.analyzing") : t("analysis.nextAiStep")}
+            </button>
+          ) : (
+            <section className="relative -mx-5 min-w-0 border-y border-outline-variant/30 bg-surface px-5 py-6 shadow-[var(--shadow-card)]">
+              <div
+                className="absolute bottom-0 left-0 top-0 w-1 bg-secondary"
+                aria-hidden
+              />
+              <div className="min-w-0 pl-4">{insightInner}</div>
+            </section>
+          )}
         </div>
       )}
     </div>

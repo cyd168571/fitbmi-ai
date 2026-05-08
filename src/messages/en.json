@@ -25,7 +25,7 @@
     "age": "Age",
     "activity": "Activity level",
     "country": "Country / region",
-    "analyze": "Analyze Results",
+    "analyze": "View BMI",
     "analyzing": "Analyzing…",
     "heightCm": "Height (cm)",
     "heightFtIn": "Height (ft/in)",
@@ -45,7 +45,8 @@
   },
   "infoBox": "Standard: WHO Global. Based on your IP, we have auto-detected your region's metric preferences.",
   "analysis": {
-    "emptyDesktop": "Enter your details and click Analyze Results to see your BMI score here.",
+    "emptyDesktop": "Enter your details and click View BMI to see your score here; then use Next: AI analysis for AI-powered insight.",
+    "nextAiStep": "Next: AI analysis results",
     "scoreTitle": "YOUR BMI SCORE"
   },
   "bmiCard": {
